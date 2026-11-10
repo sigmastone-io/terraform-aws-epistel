@@ -67,7 +67,7 @@ receipt event itself.
 | Resource | Purpose |
 |---|---|
 | `aws_s3_bucket` | Prefix `incoming/` written by SES, prefix `blobs/` written by the server. Public access blocked, versioning on, TLS-only bucket policy. Lifecycle: `incoming/` objects expire after 14 days as a backstop; old versions expire after 30 days. |
-| `aws_dynamodb_table` | Single table, on-demand billing, point-in-time recovery, time-to-live attribute for de-duplication markers. |
+| `aws_dynamodb_table` | Single table, partition key `pk` and sort key `sk` (both strings), no secondary indexes. On-demand billing, point-in-time recovery, time-to-live on the attribute `expires_at`. |
 | `aws_kms_key` | Encrypts the bucket, the table and the queues. The key policy lets SES and SNS use it for their writes. Optional: the caller may pass an existing key. |
 
 SES can also encrypt on the client side before writing to S3. That mode is
