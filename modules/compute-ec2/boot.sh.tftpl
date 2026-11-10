@@ -36,7 +36,10 @@ acme() {
 
 if [ ! -f "$ISSUED" ]; then
   # A predecessor's certificate, if there was a predecessor.
-  aws s3 cp "$STORE" - 2>/dev/null | tar -xz -C /var/lib/lego || true
+  if aws s3 cp "$STORE" /tmp/acme.tar.gz 2>/dev/null; then
+    tar -xzf /tmp/acme.tar.gz -C /var/lib/lego
+    rm -f /tmp/acme.tar.gz
+  fi
 fi
 
 if [ -f "$ISSUED" ]; then
@@ -66,15 +69,17 @@ Type=oneshot
 ExecStart=/usr/local/bin/epistel-certificate
 UNIT
 
-# Soon after boot, in case the first attempt below failed, and twice a day after that.
+# Soon after boot, in case the first attempt below failed, and every hour after that. With a
+# certificate in place a run only looks at its expiry date; without one, an hour between attempts
+# stays well inside what the certificate authority allows.
 cat > /etc/systemd/system/epistel-certificate.timer <<'UNIT'
 [Unit]
 Description=Keep the mail server's certificate fresh
 
 [Timer]
 OnBootSec=5min
-OnUnitActiveSec=12h
-RandomizedDelaySec=10min
+OnUnitActiveSec=1h
+RandomizedDelaySec=5min
 
 [Install]
 WantedBy=timers.target

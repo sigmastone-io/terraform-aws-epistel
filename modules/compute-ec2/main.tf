@@ -281,6 +281,14 @@ data "aws_iam_policy_document" "server" {
     }
   }
 
+  # The client looks at what is in the zone before it writes its record. Listing cannot be
+  # narrowed to one name; it reads record names and values of this zone, which are public anyway.
+  statement {
+    sid       = "CertificateChallengeLookup"
+    actions   = ["route53:ListResourceRecordSets"]
+    resources = ["arn:${data.aws_partition.current.partition}:route53:::hostedzone/${var.zone_id}"]
+  }
+
   # These two have no narrower resource to name.
   statement {
     sid       = "CertificateChallengeStatus"

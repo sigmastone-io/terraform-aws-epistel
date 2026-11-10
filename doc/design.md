@@ -117,7 +117,7 @@ instance gets one from an ACME certificate authority:
   record of that one name and nothing else in the zone.
 - Certificate, key and account are copied to `state/` in the bucket, so a
   replacement instance reuses them and does not ask for a new certificate.
-- A timer renews twice a day when less than 30 days are left.
+- A timer looks every hour and renews when less than 30 days are left.
 - If the first attempt fails, the server is restarted until the timer
   succeeds.
 
@@ -139,6 +139,7 @@ in a Session Manager shell; it prints an app password once.
 | `ses:SendEmail` and `ses:SendRawEmail` | the listed identities only. Both names are needed: the v2 send API with raw content, which is how the server sends, authorizes against the older name. |
 | Pull the image | the one ECR repository, when the image is in ECR |
 | Change one TXT record | `_acme-challenge.<host name>` in the zone |
+| List the zone's records | the zone. The ACME client reads before it writes, and listing cannot be narrowed to one name. |
 | Write logs | this log group |
 | Session Manager | this instance |
 
