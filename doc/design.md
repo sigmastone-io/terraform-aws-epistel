@@ -138,7 +138,7 @@ The instance role, least privilege:
 | Read, write, delete objects | this bucket |
 | Read and write items | this table |
 | Receive and delete messages | the inbound queue |
-| `ses:SendEmail` | the listed identities only |
+| `ses:SendEmail` and `ses:SendRawEmail` | the listed identities only. Both names are needed: the v2 send API with raw content, which is how the server sends, authorizes against the older name. |
 | Use the key | this key, through the services above |
 | Read and write the certificate parameters | the module's parameter path |
 | Change the ACME challenge record | that one record name, when the ACME step is on |
