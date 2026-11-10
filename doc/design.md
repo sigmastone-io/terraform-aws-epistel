@@ -34,7 +34,9 @@ Is pointed at, and never makes:
   the rule set it is told about. Only in an account that receives no mail
   yet may it be asked to create and activate one.
 - **The DNS zone** of the host name.
-- **The image.** Built and pushed by the server's repository.
+- **The image.** Built and published by the server's repository. A public
+  image is pulled as it is; one in a private ECR repository is pulled with
+  the instance's role.
 - **Leaving the SES sandbox** and sending limits, which are account settings.
 
 ## 3. Resources

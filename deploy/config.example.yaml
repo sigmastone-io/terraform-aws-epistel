@@ -11,13 +11,16 @@ region: eu-west-1
 hostname: mail.example.org
 dns_zone: example.org
 
-# The server's image, by digest. The image job of the server's repository prints the digest.
-image: 123456789012.dkr.ecr.eu-west-1.amazonaws.com/epistel@sha256:0000000000000000000000000000000000000000000000000000000000000000
+# The server's image, by digest. Every build of the server's repository publishes one and prints
+# its digest. A public image needs nothing more.
+image: ghcr.io/sigmastone-io/epistel@sha256:0000000000000000000000000000000000000000000000000000000000000000
 
-# The ECR repository the image is in, so that the instance may pull it.
-ecr:
-  repository_arn: arn:aws:ecr:eu-west-1:123456789012:repository/epistel
-  # create: true                     # instead: make a repository named after the deployment
+# Only for an image in a private Amazon ECR repository: name the repository so that the instance
+# may pull from it, or have one made under the deployment's name.
+# image: 123456789012.dkr.ecr.eu-west-1.amazonaws.com/epistel@sha256:0000000000000000000000000000000000000000000000000000000000000000
+# ecr:
+#   repository_arn: arn:aws:ecr:eu-west-1:123456789012:repository/epistel
+#   create: true
 
 # Verified SES identities the server may send from.
 ses_identities:

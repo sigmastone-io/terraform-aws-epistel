@@ -34,7 +34,7 @@ variable "mailboxes" {
 }
 
 variable "image" {
-  description = "The server's container image, ideally by digest: <registry>/<repository>@sha256:<digest>."
+  description = "The server's container image, ideally by digest: <registry>/<repository>@sha256:<digest>. A public image, such as the one the server's repository publishes, needs nothing else; one in a private ECR repository also needs `ecr`."
   type        = string
 }
 
