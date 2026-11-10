@@ -11,3 +11,8 @@ crash.log
 deploy/config.yaml
 *.tfvars
 !*.tfvars.example
+
+# Notes an operator keeps beside a deployment, such as the app passwords a first run prints.
+# They belong in a password manager; this keeps a stray file out of a commit until it gets there.
+passwords*.txt
+*.secret
