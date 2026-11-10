@@ -1,0 +1,13 @@
+# Terraform's working files.
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+tfplan
+crash.log
+
+# A deployment's own values and state are never committed. `deploy/config.example.yaml` shows the
+# shape; the filled-in `deploy/config.yaml` stays on the machine that applies it.
+deploy/config.yaml
+*.tfvars
+!*.tfvars.example

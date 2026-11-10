@@ -1,0 +1,58 @@
+# One deployment of Epistel. Copy to config.yaml and fill in; config.yaml is ignored by git.
+#
+# Everything named here exists already and is only pointed at, except where a line says "create".
+
+# Where to deploy. SES receives mail only in some regions; this has to be the region whose
+# receipt rule set is named below.
+region: eu-west-1
+# profile: my-aws-profile            # optional: the AWS CLI profile to use
+
+# The name mail clients connect to, and the Route 53 zone that holds it.
+hostname: mail.example.org
+dns_zone: example.org
+
+# The server's image, by digest. The image job of the server's repository prints the digest.
+image: 123456789012.dkr.ecr.eu-west-1.amazonaws.com/epistel@sha256:0000000000000000000000000000000000000000000000000000000000000000
+
+# The ECR repository the image is in, so that the instance may pull it.
+ecr:
+  repository_arn: arn:aws:ecr:eu-west-1:123456789012:repository/epistel
+  # create: true                     # instead: make a repository named after the deployment
+
+# Verified SES identities the server may send from.
+ses_identities:
+  - example.org
+  - example.net
+
+# The receipt rule set that is active in the account. The new rule goes first unless
+# after_rule names the rule to put it behind. Rules already there keep working.
+receipt:
+  rule_set_name: example-inbound
+  # after_rule: some-existing-rule
+  # create_rule_set: true            # only in an account that receives no mail yet
+
+# The certificate authority account. A contact address is all it needs.
+acme:
+  email: postmaster@example.org
+
+# The addresses mail is received for. Declared, not created: each is an address of a domain SES
+# already receives for. Every entry is a mailbox with its own login. An alias delivers into the
+# mailbox it is listed under.
+mailboxes:
+  - address: contact@example.org
+    name: Contact
+  - address: support@example.org
+    name: Support
+    aliases:
+      - help@example.org
+  - address: legal@example.net
+
+# Optional.
+# name: epistel                      # prefix of everything that is made
+# instance_type: t3.micro
+# allowed_cidrs: ["0.0.0.0/0"]       # who may connect to ports 993 and 465
+# network:
+#   subnet_id: subnet-0123456789abcdef0   # an existing public subnet; otherwise one is made
+# protect_data: true                 # refuse to destroy the table and a bucket holding mail
+# tags:
+#   Project: epistel

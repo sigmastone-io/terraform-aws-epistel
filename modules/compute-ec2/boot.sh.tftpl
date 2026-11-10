@@ -1,0 +1,130 @@
+#!/bin/bash
+# First boot of the mail server's instance. Runs once, as root.
+#
+# Installs the container runtime, writes the server's configuration, obtains the certificate, and
+# leaves two things running: the server, and a timer that keeps the certificate fresh.
+set -euo pipefail
+
+dnf install -y docker
+systemctl enable --now docker
+
+install -d -m 0755 /etc/epistel /etc/epistel/tls /var/lib/lego
+
+cat > /etc/epistel/epistel.toml <<'EPISTEL_CONFIG'
+${config}
+EPISTEL_CONFIG
+chmod 0644 /etc/epistel/epistel.toml
+
+# -------------------------------------------------------------------------------------------------
+# Certificate: issued for the host name by proving control of it in DNS, kept in the bucket so
+# that a replacement instance does not ask for a new one.
+# -------------------------------------------------------------------------------------------------
+cat > /usr/local/bin/epistel-certificate <<'CERTIFICATE_SCRIPT'
+#!/bin/bash
+set -euo pipefail
+STORE="s3://${bucket}/state/acme.tar.gz"
+ISSUED="/var/lib/lego/certificates/${hostname}.crt"
+KEY="/var/lib/lego/certificates/${hostname}.key"
+
+acme() {
+  # The host's network, so that the client reaches the instance's own credentials directly.
+  docker run --rm --network host -v /var/lib/lego:/.lego \
+    -e AWS_REGION="${region}" -e AWS_HOSTED_ZONE_ID="${zone_id}" \
+    "${acme_client}" --path /.lego --accept-tos --email "${acme_email}" \
+    --server "${acme_directory}" --dns route53 --domains "${hostname}" "$@"
+}
+
+if [ ! -f "$ISSUED" ]; then
+  # A predecessor's certificate, if there was a predecessor.
+  aws s3 cp "$STORE" - 2>/dev/null | tar -xz -C /var/lib/lego || true
+fi
+
+if [ -f "$ISSUED" ]; then
+  acme renew --days 30
+else
+  acme run
+fi
+
+# Only touch the files the server watches when their content changed.
+if ! cmp -s "$ISSUED" /etc/epistel/tls/fullchain.pem || ! cmp -s "$KEY" /etc/epistel/tls/key.pem; then
+  install -m 0644 "$ISSUED" /etc/epistel/tls/fullchain.pem
+  # The server runs as an unprivileged user inside its container; the key is readable by it alone.
+  install -m 0400 -o 65532 -g 65532 "$KEY" /etc/epistel/tls/key.pem
+  tar -cz -C /var/lib/lego . | aws s3 cp - "$STORE"
+fi
+CERTIFICATE_SCRIPT
+chmod 0755 /usr/local/bin/epistel-certificate
+
+cat > /etc/systemd/system/epistel-certificate.service <<'UNIT'
+[Unit]
+Description=Obtain or renew the mail server's certificate
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/epistel-certificate
+UNIT
+
+# Soon after boot, in case the first attempt below failed, and twice a day after that.
+cat > /etc/systemd/system/epistel-certificate.timer <<'UNIT'
+[Unit]
+Description=Keep the mail server's certificate fresh
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=12h
+RandomizedDelaySec=10min
+
+[Install]
+WantedBy=timers.target
+UNIT
+
+# -------------------------------------------------------------------------------------------------
+# The server
+# -------------------------------------------------------------------------------------------------
+cat > /usr/local/bin/epistel-pull <<'PULL_SCRIPT'
+#!/bin/bash
+set -euo pipefail
+IMAGE="${image}"
+REGISTRY="$(echo "$IMAGE" | cut -d/ -f1)"
+case "$REGISTRY" in
+  *.dkr.ecr.*.amazonaws.com*)
+    REGISTRY_REGION="$(echo "$REGISTRY" | cut -d. -f4)"
+    aws ecr get-login-password --region "$REGISTRY_REGION" | docker login --username AWS --password-stdin "$REGISTRY"
+    ;;
+esac
+docker pull "$IMAGE"
+docker rm -f epistel 2>/dev/null || true
+PULL_SCRIPT
+chmod 0755 /usr/local/bin/epistel-pull
+
+cat > /etc/systemd/system/epistel.service <<'UNIT'
+[Unit]
+Description=Epistel mail server
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Restart=always
+RestartSec=10
+ExecStartPre=/usr/local/bin/epistel-pull
+ExecStart=/usr/bin/docker run --rm --name epistel \
+  -p 993:993 -p 465:465 \
+  -v /etc/epistel:/etc/epistel:ro \
+  --log-driver awslogs --log-opt awslogs-region=${region} \
+  --log-opt awslogs-group=${log_group} --log-opt awslogs-stream=server \
+  ${image} serve
+ExecStop=/usr/bin/docker stop epistel
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl daemon-reload
+# Without a certificate the server refuses to start and is started again every few seconds, so a
+# failure here is not the end: the timer tries again and the server comes up when it succeeds.
+/usr/local/bin/epistel-certificate || echo "certificate not obtained yet; the timer will try again"
+systemctl enable --now epistel-certificate.timer
+systemctl enable --now epistel.service
