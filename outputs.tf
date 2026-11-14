@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sigmastone OÜ
+# SPDX-License-Identifier: Apache-2.0
+
 output "hostname" {
   description = "What to enter in a mail client: this name, port 993 for incoming and 465 for outgoing, both SSL/TLS."
   value       = lower(var.hostname)

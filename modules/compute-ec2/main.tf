@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sigmastone OÜ
+# SPDX-License-Identifier: Apache-2.0
+
 # The cheapest shape that runs the server: one small instance with a public address, running the
 # container image, with a certificate it fetches itself.
 #

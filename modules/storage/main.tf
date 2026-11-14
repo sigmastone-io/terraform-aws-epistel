@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sigmastone OÜ
+# SPDX-License-Identifier: Apache-2.0
+
 # Where mail lives: one bucket for messages, one table for everything about them.
 #
 # The bucket has three prefixes. SES writes received mail under `incoming/`; the server moves it

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sigmastone OÜ
+# SPDX-License-Identifier: Apache-2.0
+
 # A deployment of the module, driven by one file.
 #
 # Copy `config.example.yaml` to `config.yaml`, fill it in, and run Terraform here:

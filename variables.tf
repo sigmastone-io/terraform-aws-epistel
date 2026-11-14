@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sigmastone OÜ
+# SPDX-License-Identifier: Apache-2.0
+
 variable "name" {
   description = "Prefix for the names of everything this module makes."
   type        = string

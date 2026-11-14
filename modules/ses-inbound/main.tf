@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sigmastone OÜ
+# SPDX-License-Identifier: Apache-2.0
+
 # From SES to the server: one receipt rule, one topic, one queue.
 #
 # The rule stores each received message in the bucket and publishes the receipt notification,

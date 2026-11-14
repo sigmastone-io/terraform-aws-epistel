@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Sigmastone OÜ
+# SPDX-License-Identifier: Apache-2.0
+
 # Epistel on AWS: the storage, the path from SES to the server, and the server itself.
 #
 # What this module makes is its own: a bucket, a table, a topic, two queues, one receipt rule,
