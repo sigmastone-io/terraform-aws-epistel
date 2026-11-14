@@ -1,14 +1,15 @@
 # terraform-aws-epistel
 
+[![ci](https://github.com/sigmastone-io/terraform-aws-epistel/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/sigmastone-io/terraform-aws-epistel/actions/workflows/ci.yml)
+
 Terraform module that runs [Epistel](https://github.com/sigmastone-io/epistel), the open source
 mail server for domains on Amazon SES, on AWS and connects it to SES. Given a domain SES already
 receives mail for, one module call gives working IMAP and SMTP Submission mailboxes for the
 addresses you declare, at the lowest running cost AWS allows.
 
-> **Status: pre-release.** The module is formatted and validated; the first apply against a real
-> account, checks in CI and registry publication are still open (see
-> [doc/roadmap.md](doc/roadmap.md)). It tracks Epistel 0.1, which has no compatibility promises
-> before 1.0.
+> **Status: 0.1.0, the first release.** The module is formatted and validated in CI; a first apply
+> against a real account and registry publication come next (see [doc/roadmap.md](doc/roadmap.md)).
+> It tracks Epistel 0.1, which has no compatibility promises before 1.0.
 
 ## What it creates
 

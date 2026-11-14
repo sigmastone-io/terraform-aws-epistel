@@ -214,7 +214,8 @@ this scale.
 
 ## 10. Quality
 
-- `terraform fmt` and `terraform validate` on the module and on `deploy/`.
+- `terraform fmt` and `terraform validate` on the module and on `deploy/`, in
+  continuous integration on every push and pull request.
 - Provider and Terraform versions pinned with lower bounds only.
 - Releases are tagged with semantic versions so the module can be published
   to the Terraform Registry.

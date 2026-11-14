@@ -16,13 +16,16 @@ Built:
 - Create-or-point-at for the network, the ECR repository and the rule set.
 - `deploy/`: a deployment driven by one ignored configuration file, with
   local state.
+- Checks in continuous integration: formatting, and validation of the module
+  and of `deploy/`.
 
-Still to do before 0.1:
+0.1.0 is this list.
 
-- A first apply against a real account. Nothing here has been applied yet;
-  it is formatted and validated only.
-- Checks in continuous integration.
-- Examples and registry publication.
+## Next
+
+- A first apply against a real account. Up to 0.1.0 the module is formatted
+  and validated only.
+- Examples under `examples/` and publication in the Terraform Registry.
 
 ## Not in 0.1
 

@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2026 Sigmastone OÜ
+# SPDX-License-Identifier: Apache-2.0
+
+name: ci
+
+on:
+  push:
+    branches: [dev]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # Formatting, and validation of the module and of the deployment in deploy/. Nothing here talks
+  # to an AWS account: there is no backend and no credentials.
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false -input=false
+      - run: terraform validate
+      # deploy/ reads config.yaml, which is never committed; the example has the same shape.
+      - run: cp deploy/config.example.yaml deploy/config.yaml
+      - run: terraform -chdir=deploy init -backend=false -input=false
+      - run: terraform -chdir=deploy validate
